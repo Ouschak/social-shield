@@ -2,7 +2,10 @@
 
 Social Shield is a privacy-first browser extension and locally-hosted backend designed to make social media safer by intercepting and filtering comments in real-time. It provides tailored filtering strategies: from catching explicit profanity, to identifying passive-aggressive "soft harassment" that platforms often ignore.
 
-Check out our demo video on YouTube:
+Here is how the extension looks in action:
+![Demo](assets/demo.png)
+
+Check out our full demo video on YouTube:
 [![Social Shield Demo Video](https://img.youtube.com/vi/VJcQ6SRnVuQ/0.jpg)](https://www.youtube.com/watch?v=VJcQ6SRnVuQ)
 
 ## Exact Implementation: The 4-Layer Protection Cascade
