@@ -1,0 +1,26 @@
+/* Base blur for toxic content */
+[data-toxic="true"] {
+    filter: blur(6px);
+    transition: filter 0.3s;
+}
+
+/* Instant override when protection is disabled */
+body.cs-protection-disabled [data-toxic="true"] {
+    filter: none !important;
+}
+
+body.cs-protection-disabled .cs-toxic-overlay {
+    display: none !important;
+}
+
+/* Button styles */
+.cs-flag-btn {
+    opacity: 0;
+    transition: opacity 0.2s;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #9ca3af;
+    margin-left: 8px;
+    vertical-align: middle;
+}

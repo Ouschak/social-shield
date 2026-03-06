@@ -1,0 +1,17 @@
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+dist/
+
+# Models
+Gen_AI/model/
+Gen_AI/downloading_models/
+Gen_AI/setfit_model/
+
+# Misc
+.DS_Store
