@@ -2,34 +2,31 @@
 
 Social Shield is a privacy-first browser extension and locally-hosted backend designed to make social media safer by intercepting and filtering comments in real-time. It provides tailored filtering strategies: from catching explicit profanity, to identifying passive-aggressive "soft harassment" that platforms often ignore.
 
-## What We Did
+Check out our demo video on YouTube:
+[![Social Shield Demo Video](https://img.youtube.com/vi/VJcQ6SRnVuQ/0.jpg)](https://www.youtube.com/watch?v=VJcQ6SRnVuQ)
+
+## Exact Implementation: The 4-Layer Protection Cascade
 
 We built a real-time comment moderation system that consists of two main components:
-1. **JavaScript Browser Extension:** Intercepts DOM changes in real-time to analyze incoming and outgoing comments. 
+1. **JavaScript Browser Extension:** Intercepts DOM changes in real-time to analyze incoming and outgoing comments.
 2. **Python / FastAPI Backend:** A dedicated local ASGI server (running 4 workers) that orchestrates low-latency decision logic and serves our local AI models.
 
-To balance speed, accuracy, and cost, we designed a **4-Layer Protection Cascade**:
-- **Stage 0 (Keyword Filter):** Instantly filters user-defined specific words (<1ms).
-- **Stage 1 (Local Guard):** Instantly catches general profanity and explicit hate, including typos.
-- **Stage 2 (Cloud Moderator):** Checks for severe toxicity using a fallback to the OpenAI Moderation API.
-- **Stage 3 (Context Engine):** Safeguards creators from subtle, passive-aggressive soft harassment using contextual few-shot contrastive learning.
+To balance speed, accuracy, and cost, we designed a highly specific **4-Layer Protection Cascade**. Every comment goes through this exact pipeline:
+
+1. **Stage 0 (Keyword Filter):** The frontend extension runs a local regex filter for user-chosen bad words. This runs instantly on the device before anything even hits the backend.
+2. **Stage 1 (Local Guard):** The backend immediately runs the comment through a fine-tuned **`s-nlp/roberta_toxicity_classifier` (RoBERTa-Large)**. This handles immediate recognition of general hate speech and typical toxicity.
+3. **Stage 2 (Cloud Fallback):** If the RoBERTa model is unsure about a severe toxicity case (confidence drops below our `0.70` threshold), the system automatically falls back to the **OpenAI Moderation API**. This is highly reliable, free-to-use omni-moderation that steps in when needed.
+4. **Stage 3 (Context Engine):** For comments that pass the initial toxic filters, we run our customized **SetFit** model (`all-MiniLM-L12-v2`). This sentence transformer detects "soft harassment" and discouraging comments (passive-aggressive behavior) that traditional classifiers miss.
 
 The architecture is entirely stateless. We do not store or sell user data; text is discarded the moment it is evaluated.
-
-## What Models We Used
-
-Our pipeline uses the following models:
-- **Stage 1 (Explicit Hate):** Fine-tuned `s-nlp/roberta_toxicity_classifier` (RoBERTa-Large). This model handles immediate recognition of general hate speech and typical toxicity.
-- **Stage 2 (Severe Toxicity):** **OpenAI Omni-Moderation API**, which is a highly reliable cloud fallback that runs in ~160ms.
-- **Stage 3 (Soft Harassment):** **SetFit** model (`all-MiniLM-L12-v2`). We fine-tuned this lightweight sentence transformer using a few-shot contrastive learning framework to detect subtle, passive-aggressive behavior in ~200ms.
 
 ## What We Found (Benchmarks)
 
 We validated our architecture against real-world test sets (e.g., Instagram comments) and found:
-*   **Explicit Hate (Stage 1 & 2):** We caught up to **98%** of explicit hate using our fine-tuned RoBERTa-Large model combined with OpenAI’s Moderation API.
-*   **Soft Harassment (Stage 3):** We achieved **~86% recall** on detecting subtle harassment in our benchmarks using the SetFit model.
+*   **Explicit Hate (Stages 1 & 2):** We caught up to **98%** of explicit hate using our fine-tuned RoBERTa-Large model combined with the OpenAI API fallback.
+*   **Soft Harassment (Stage 3):** We achieved **~86% recall** on detecting subtle harassment and discouraging comments in our benchmarks using the SetFit model.
 
-The combination of a small localized model (SetFit) and a larger contextual classification model (RoBERTa) allowed us to achieve high accuracy for nuanced moderation while maintaining low inference latency.
+The combination of a small localized model (SetFit), a robust local classifier (RoBERTa), and a cloud fallback (OpenAI) allows us to achieve high accuracy for nuanced moderation while maintaining low inference latency.
 
 ---
 
